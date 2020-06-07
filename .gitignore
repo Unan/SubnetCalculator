@@ -3,6 +3,7 @@
 **/target/
 **/.DS_Store
 **/.idea
+.gitignore
 
 # Compiled class file
 *.class
