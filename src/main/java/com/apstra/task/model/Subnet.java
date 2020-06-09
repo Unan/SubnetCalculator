@@ -14,17 +14,25 @@ public class Subnet {
     private IpAddress broadcastAddress;
 
     public Subnet(List<IpAddress> ipAddresses) {
-        if (ipAddresses.isEmpty()) {
-            throw new EmptySubnetException();
-        }
-        duplicateCheck(ipAddresses);
+        validate(ipAddresses);
         this.ipAddresses = ipAddresses;
         this.mask = countMask(ipAddresses);
         this.subnetAddress = countSubnet(ipAddresses.get(0), mask);
         this.broadcastAddress = countBroadcast(subnetAddress, mask);
     }
 
-    private void duplicateCheck(List<IpAddress> ipAddresses) {
+    private void validate(List<IpAddress> ipAddresses) {
+        checkEmptiness(ipAddresses);
+        checkDuplicates(ipAddresses);
+    }
+
+    private void checkEmptiness(List<IpAddress> ipAddresses) {
+        if (ipAddresses.isEmpty()) {
+            throw new EmptySubnetException();
+        }
+    }
+
+    private void checkDuplicates(List<IpAddress> ipAddresses) {
         HashSet<String> ipStrings = new HashSet<>();
         ipAddresses.forEach(ipAddress -> {
             if (!ipStrings.add(ipAddress.toString())) {
@@ -39,13 +47,11 @@ public class Subnet {
         for (int i = 1; i < ipAddresses.size(); i++) {
             for (int j = 0; j < minMatch; j++) {
                 if (ipAddresses.get(i).getIp()[j] != ipAddress.getIp()[j]) {
-                    minMatch = j - 1;
+                    minMatch = j;
                 }
             }
         }
-        return minMatch == 32
-                ? minMatch
-                : minMatch + 1;
+        return minMatch;
     }
 
     private IpAddress countSubnet(IpAddress ipAddress, int mask) {
@@ -70,15 +76,15 @@ public class Subnet {
     @Override
     public String toString() {
         return "Subnet {" +
-                "\n\t" + binaryMask(mask) + " - mask" +
+                "\n\t" + toBinaryMask(mask) + " - mask" +
                 "\n\t" + subnetAddress + " - subnet address" +
                 "\n\t" + broadcastAddress + " - broadcast address" +
                 "\n\n\tip addresses: " +
-                ipAddressesListToString(ipAddresses) +
+                toStringsIpAddresses(ipAddresses) +
                 "\n}";
     }
 
-    private String binaryMask(int mask) {
+    private String toBinaryMask(int mask) {
         boolean[] ip = new boolean[32];
         for (int i = 0; i < mask; i++) {
             ip[i] = true;
@@ -86,7 +92,7 @@ public class Subnet {
         return new IpAddress(ip).toString();
     }
 
-    private String ipAddressesListToString(List<IpAddress> ipAddresses) {
+    private String toStringsIpAddresses(List<IpAddress> ipAddresses) {
         StringBuilder stringBuilder = new StringBuilder();
         ipAddresses.forEach(ipAddress -> stringBuilder.append("\n\t").append(ipAddress.toString()));
         return stringBuilder.toString();

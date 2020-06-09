@@ -4,7 +4,9 @@ import com.apstra.task.exception.IpValidationException;
 
 public class IpAddress {
 
-    public static final String IP_CHECK_REGEX =
+    private static final int OCTET_LENGTH = 8;
+
+    private static final String IP_CHECK_REGEX =
             "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
                     "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
                     "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
@@ -34,12 +36,12 @@ public class IpAddress {
     }
 
     private void toCharArray(String octetString, int octet) {
-        int delta = 8 - octetString.length();
+        int delta = OCTET_LENGTH - octetString.length();
         for (int i = 7; i >= delta; i--) {
-            ip[i + (8 * octet)] = octetString.charAt(i - delta) != '0';
+            ip[i + (OCTET_LENGTH * octet)] = octetString.charAt(i - delta) != '0';
         }
         for (int i = delta - 1; i >= 0; i--) {
-            ip[i + (8 * octet)] = false;
+            ip[i + (OCTET_LENGTH * octet)] = false;
         }
     }
 
@@ -53,7 +55,7 @@ public class IpAddress {
     public String toString() {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < ip.length; i++) {
-            if (i % 8 == 0 && i > 0) {
+            if (i % OCTET_LENGTH == 0 && i > 0) {
                 result.append('.');
             }
             result.append(ip[i] ? '1' : '0');
